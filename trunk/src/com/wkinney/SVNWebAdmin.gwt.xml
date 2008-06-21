@@ -14,6 +14,6 @@
 	<script src="js/ext/adapter/ext/ext-base.js" />
 	<script src="js/ext/ext-all.js" />
 	
-  	<servlet path='/svnadmin' class='com.wkinney.server.SVNAdminServiceImpl'/>
+  	<servlet path='/svn-web-admin' class='com.wkinney.server.SVNAdminServiceImpl'/>
   	
 </module>

@@ -58,10 +58,12 @@ import com.gwtext.client.widgets.layout.AnchorLayoutData;
 import com.gwtext.client.widgets.layout.ColumnLayout;
 import com.gwtext.client.widgets.layout.ColumnLayoutData;
 import com.gwtext.client.widgets.layout.FitLayout;
-import com.gwtext.client.widgets.layout.HorizontalLayout;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
+ * 
+ * @author wkinney
+ * 
  */
 public class SVNWebAdmin implements EntryPoint {
 
@@ -88,7 +90,7 @@ public class SVNWebAdmin implements EntryPoint {
 
         final SVNAdminServiceAsync svnAdminService = (SVNAdminServiceAsync) GWT.create(SVNAdminService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) svnAdminService;
-        String moduleRelativeURL = GWT.getModuleBaseURL() + "svnadmin";
+        String moduleRelativeURL = GWT.getModuleBaseURL() + "svn-web-admin";
         endpoint.setServiceEntryPoint(moduleRelativeURL);
 
         // 1st Panel - User
@@ -120,35 +122,21 @@ public class SVNWebAdmin implements EntryPoint {
         final Store ppStore = new Store(ppRecordDef);
 
 
+        // Show progress bar
+        MessageBox.show(new MessageBoxConfig() {
+             {
+                 setTitle("Please wait...");
+                 setMsg("Initializing...");
+                 setWidth(240);
+                 setProgress(true);
+                 setClosable(false);
 
+             }
+         });
 
-
-        MessageBox.confirm("Confirm", "Load SVN administration configuration?", new MessageBox.ConfirmCallback() {
-            public void execute(String btnID) {
-                //System.out.println("load svn button click : " + Format.format("You clicked the {0} button", btnID));
-                if (btnID.equalsIgnoreCase("Yes")) {
-
-
-                     // Show progress bar
-                    MessageBox.show(new MessageBoxConfig() {
-                         {
-                             setTitle("Please wait...");
-                             setMsg("Initializing...");
-                             setWidth(240);
-                             setProgress(true);
-                             setClosable(false);
-
-                         }
-                     });
-
-                   populateUsersList(svnAdminService, userDDLStore, userDDLRecordDef);
-                   populateGroupsPanel(svnAdminService, groupingStore, userDDLStore, groupDDLStore, groupingRecordDef, userDDLRecordDef, groupDDLRecordDef);
-                   populateProjectPathPanel(svnAdminService, ppStore, ppRecordDef);
-
-                }
-
-            }
-        });
+        populateUsersList(svnAdminService, userDDLStore, userDDLRecordDef);
+        populateGroupsPanel(svnAdminService, groupingStore, userDDLStore, groupDDLStore, groupingRecordDef, userDDLRecordDef, groupDDLRecordDef);
+        populateProjectPathPanel(svnAdminService, ppStore, ppRecordDef);
 
 
 
@@ -172,6 +160,8 @@ public class SVNWebAdmin implements EntryPoint {
         // Tab Panels
 
         TabPanel tabs = new TabPanel();
+        tabs.setWidth(500);
+        tabs.setHeight(400);
         tabs.setPaddings(8);
         tabs.add(usersPanel);
         tabs.add(groupsPanel);
@@ -286,7 +276,7 @@ public class SVNWebAdmin implements EntryPoint {
             }
 
             public void onFailure(Throwable caught) {
-               // System.out.println("Fail! " + System.currentTimeMillis());
+               // GWT.log("Fail! " + System.currentTimeMillis());
                 caught.printStackTrace();
             }
         };
@@ -337,11 +327,11 @@ public class SVNWebAdmin implements EntryPoint {
                     }
 
                 }
-                //System.out.println("memberships selected to remove :" + users);
+                //GWT.log("memberships selected to remove :" + users);
 
                 MessageBox.confirm("Confirm", "Remove membership for the following user(s) \"" + users + "\"?", new MessageBox.ConfirmCallback() {
                     public void execute(String btnID) {
-                       // System.out.println("Button Click : " + Format.format("You clicked the {0} button", btnID));
+                       // GWT.log("Button Click : " + Format.format("You clicked the {0} button", btnID));
                         if (btnID.equalsIgnoreCase("Yes")) {
 
                             addMembershipFormPanel.setVisible(false);
@@ -383,7 +373,7 @@ public class SVNWebAdmin implements EntryPoint {
 
                 addMembershipFormPanel.setVisible(true);
                 userCB.focus();
-               // System.out.println("Add Membership button clicked");
+               // GWT.log("Add Membership button clicked");
             }
         });
 
@@ -508,11 +498,11 @@ public class SVNWebAdmin implements EntryPoint {
                     final String group = groupCB.getValueAsString();
                     final String user = userCB.getValueAsString();
 
-                   // System.out.println("membership to add: " + user + " to group: " + group);
+                   // GWT.log("membership to add: " + user + " to group: " + group);
 
                     MessageBox.confirm("Confirm", "Add membership to group \"" + group + "\" for user \"" + user + "\"?", new MessageBox.ConfirmCallback() {
                         public void execute(String btnID) {
-                        //    System.out.println("Button Click : " + Format.format("You clicked the {0} button", btnID));
+                        //    GWT.log("Button Click : " + Format.format("You clicked the {0} button", btnID));
                             if (btnID.equalsIgnoreCase("Yes")) {
 
 
@@ -587,75 +577,7 @@ public class SVNWebAdmin implements EntryPoint {
 
         return groupsPanel;
 
-// final Panel accordionPanel = new Panel();
-// accordionPanel.setLayout(new AccordionLayout(true));
-//
-// accordionPanel.setHeight(400);
-// accordionPanel.setWidth(200);
-//
-//
-//         final RecordDef recordDef = new RecordDef(new FieldDef[] { new StringFieldDef("user") });
-//
-//
-//         AsyncCallback callback = new AsyncCallback() {
-//            public void onSuccess(Object result) {
-//
-//                Map groupMembersMap = (Map) result;
-//
-//                groupSet.add("*");
-//
-//                for (Iterator it = groupMembersMap.keySet().iterator(); it.hasNext();) {
-//                    String groupName = (String) it.next();
-//
-//                    groupSet.add(groupName);
-//
-//                    GridPanel usersGrid = new GridPanel();
-//                    Store usersStore = new Store(recordDef);
-//                    usersStore.load();
-//                    usersGrid.setWidth(100);
-//                    usersGrid.hideColumnHeader();
-//                    usersGrid.setStore(usersStore);
-//
-//                    int i = 0;
-//
-//                    List memberList = (List) groupMembersMap.get(groupName);
-//                    for (Iterator it2 = memberList.iterator(); it2.hasNext();) {
-//                        String member = (String) it2.next();
-//
-//                        usersStore.add(recordDef.createRecord(new Object[] {member}));
-//                        i++;
-//                    }
-//
-//                    usersGrid.getStore().load();
-//
-//
-//                    Panel panel = new Panel(groupName);
-//
-//                    panel.add(usersGrid);
-//
-//
-//                    if (groupName.equalsIgnoreCase("admin") || groupName.equalsIgnoreCase("administrator")) {
-//                        panel.setIconCls("user-suit-icon");
-//                    } else {
-//                        panel.setIconCls("user-icon");
-//                    }
-//
-//                    accordionPanel.add(panel);
-//                }
-//
-//            }
-//
-//            public void onFailure(Throwable caught) {
-//                System.out.println("Fail! " + System.currentTimeMillis());
-//                caught.printStackTrace();
-//            }
-//        };
-//
-//        svnAdminService.getGroupMembersMap(callback);
-//
-//
-//
-//        return accordionPanel;
+
     }
 
    private void populateUsersList(final SVNAdminServiceAsync svnAdminService, final Store store) {
@@ -708,7 +630,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in removing memberships for users: " + uniqueUsers);
-              // System.out.println("Fail! " + System.currentTimeMillis());
+              // GWT.log("Fail! " + System.currentTimeMillis());
                e.printStackTrace();
            }
        };
@@ -762,7 +684,7 @@ public class SVNWebAdmin implements EntryPoint {
        allRecordSet.removeAll(toRemoveSet);
 
        for (Iterator it = allRecordSet.iterator(); it.hasNext(); ) {
-          // System.out.println("updated value: " + it.next());
+          // GWT.log("updated value: " + it.next());
        }
 
      //<String, String>
@@ -811,7 +733,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in updating project access for groups: " + updateDetails);
-               //System.out.println("Fail! " + System.currentTimeMillis());
+               //GWT.log("Fail! " + System.currentTimeMillis());
                e.printStackTrace();
            }
        };
@@ -846,7 +768,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in adding project access: " + accessType + " for group: " + groupName);
-              // System.out.println("Fail! " + System.currentTimeMillis());
+              // GWT.log("Fail! " + System.currentTimeMillis());
                e.printStackTrace();
            }
        };
@@ -873,7 +795,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in removing project access: " + accessType + " for group: " + groupName);
-              // System.out.println("Fail! " + System.currentTimeMillis());
+              // GWT.log("Fail! " + System.currentTimeMillis());
                e.printStackTrace();
            }
        };
@@ -912,7 +834,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in creating the membership for user: " + userName);
-              // System.out.println("Fail! " + System.currentTimeMillis());
+              // GWT.log("Fail! " + System.currentTimeMillis());
                e.printStackTrace();
            }
        };
@@ -953,7 +875,7 @@ public class SVNWebAdmin implements EntryPoint {
            }
 
            public void onFailure(Throwable caught) {
-             //  System.out.println("Fail! " + System.currentTimeMillis());
+             //  GWT.log("Fail! " + System.currentTimeMillis());
                caught.printStackTrace();
            }
        };
@@ -985,8 +907,8 @@ public class SVNWebAdmin implements EntryPoint {
         userGrid.setFrame(false);
         userGrid.setStripeRows(true);
         userGrid.setAutoExpandColumn("user");
-
-        userGrid.setHeight(350);
+        userGrid.setAutoHeight(true);
+       // userGrid.setHeight(350);
         userGrid.setWidth(220);
         // userGrid.setTitle("Users");
 
@@ -998,7 +920,7 @@ public class SVNWebAdmin implements EntryPoint {
                 Record record = store.getAt(rowIndex);
                 String user = record.getAsString("user");
                // String user = (String) memberList.get(rowIndex);
-               // System.out.println("Clicked on user: " + user);
+               // GWT.log("Clicked on user: " + user);
                 setUserEditPanel(svnAdminService, user, userEditOrAddPanel, userStore, groupingStore, groupStore);
                 userEditOrAddPanel.doLayout(true);
                 userEditOrAddPanel.show();
@@ -1009,7 +931,7 @@ public class SVNWebAdmin implements EntryPoint {
 
         Button addUser = new Button("Add User", new ButtonListenerAdapter() {
             public void onClick(Button button, EventObject e) {
-               // System.out.println("Add user button clicked");
+               // GWT.log("Add user button clicked");
                 userEditOrAddPanel.clear();
                 userEditOrAddPanel.hide();
                 setUserAddPanel(svnAdminService, userEditOrAddPanel, userStore);
@@ -1021,12 +943,32 @@ public class SVNWebAdmin implements EntryPoint {
 
         userGrid.addButton(addUser);
 
+        
+        final Panel usersLeftPanel = new Panel();
+        usersLeftPanel.setLayout(new FitLayout());
+        usersLeftPanel.add(userGrid);
+        usersLeftPanel.setBorder(false);
+        usersLeftPanel.setPaddings(4);
+
+        final Panel usersRightPanel = new Panel();
+        usersRightPanel.setLayout(new FitLayout());
+        usersRightPanel.add(userEditOrAddPanel);
+        usersRightPanel.setBorder(false);
+        usersRightPanel.setPaddings(4);
+       // projectsRightPanel.setVisible(false);
+
+        
         final Panel usersPanel = new Panel();
-        usersPanel.setLayout(new HorizontalLayout(8));
         usersPanel.setTitle("Users");
-        usersPanel.setHeight(450);
-        usersPanel.add(userGrid);
-        usersPanel.add(userEditOrAddPanel);
+        usersPanel.setBorder(false);
+        usersPanel.setLayout(new FitLayout());
+        Panel usersWrapperPanel = new Panel();
+        usersWrapperPanel.setBorder(false);
+
+        usersWrapperPanel.setLayout(new ColumnLayout());
+        usersWrapperPanel.add(usersLeftPanel, new ColumnLayoutData(.30));
+        usersWrapperPanel.add(usersRightPanel, new ColumnLayoutData(.70));
+        usersPanel.add(usersWrapperPanel);
 
         return usersPanel;
 
@@ -1065,17 +1007,17 @@ public class SVNWebAdmin implements EntryPoint {
         final class SecondPasswordValidator implements Validator {
             public boolean validate(String value) throws ValidationException {
                 if(value == null || value.trim().equals("")) {
-               //     System.out.println("password is blank");
+               //     GWT.log("password is blank");
                     return false;
                 }
 //               assumes this validator is set to the second password object
                 if (password.getValueAsString() == null || password.getValueAsString().trim().equals("")) {
-              //      System.out.println("passwordConfirm is blank");
+              //      GWT.log("passwordConfirm is blank");
                     return false;
                 }
                 // make sure they equal each other
                 if (!value.trim().equals(password.getValueAsString().trim())) {
-             //       System.out.println("passwords do not equal");
+             //       GWT.log("passwords do not equal");
                     return false;
                 }
                 return true;
@@ -1137,7 +1079,7 @@ public class SVNWebAdmin implements EntryPoint {
               public void onClick(final Button button, EventObject e) {
                 MessageBox.confirm("Confirm", "Delete the user \"" + username.getValueAsString() + "\"?", new MessageBox.ConfirmCallback() {
                     public void execute(String btnID) {
-                    //    System.out.println("Button Click : " + Format.format("You clicked the {0} button", btnID));
+                    //    GWT.log("Button Click : " + Format.format("You clicked the {0} button", btnID));
                         if (btnID.equalsIgnoreCase("Yes")) {
 
                          // Show progress bar
@@ -1204,17 +1146,17 @@ public class SVNWebAdmin implements EntryPoint {
         final class SecondPasswordValidator implements Validator {
             public boolean validate(String value) throws ValidationException {
                 if(value == null || value.trim().equals("")) {
-                  //  System.out.println("password is blank");
+                  //  GWT.log("password is blank");
                     return false;
                 }
 //               assumes this validator is set to the second password object
                 if (password.getValueAsString() == null || password.getValueAsString().trim().equals("")) {
-                 //   System.out.println("passwordConfirm is blank");
+                 //   GWT.log("passwordConfirm is blank");
                     return false;
                 }
                 // make sure they equal each other
                 if (!value.trim().equals(password.getValueAsString().trim())) {
-                //    System.out.println("passwords do not equal");
+                //    GWT.log("passwords do not equal");
                     return false;
                 }
                 return true;
@@ -1300,7 +1242,7 @@ public class SVNWebAdmin implements EntryPoint {
 
                 MessageBox.prompt("Add Project", "Enter the project path", new MessageBox.PromptCallback() {
                     public void execute(String btnID, String text) {
-                   //    System.out.println("Button Click : " +
+                   //    GWT.log("Button Click : " +
                    //            Format.format("You clicked the {0} button and " +
                    //                    "entered the text {1}", btnID, text));
                        if (btnID.equalsIgnoreCase("OK")) {
@@ -1316,7 +1258,7 @@ public class SVNWebAdmin implements EntryPoint {
                     }
                 });
 
-                //System.out.println("Add Project button clicked");
+                //GWT.log("Add Project button clicked");
             }
         });
         ppGrid.setTopToolbar(addProjectButton);
@@ -1344,11 +1286,11 @@ public class SVNWebAdmin implements EntryPoint {
                     ppList.add(record.getAsString("projectPath"));
 
                 }
-              //  System.out.println("projectss selected to remove :" + pp);
+              //  GWT.log("projectss selected to remove :" + pp);
 
                 MessageBox.confirm("Confirm", "Remove the following project(s) \"" + pp + "\"?", new MessageBox.ConfirmCallback() {
                     public void execute(String btnID) {
-                    //    System.out.println("Button Click : " + Format.format("You clicked the {0} button", btnID));
+                    //    GWT.log("Button Click : " + Format.format("You clicked the {0} button", btnID));
                         if (btnID.equalsIgnoreCase("Yes")) {
 
                             //addMembershipFormPanel.setVisible(false);
@@ -1424,7 +1366,7 @@ public class SVNWebAdmin implements EntryPoint {
                     }
 
                 }
-               // System.out.println("group access selected to remove :" + groups);
+               // GWT.log("group access selected to remove :" + groups);
 
                 MessageBox.confirm("Confirm", "Remove project access for the following group(s) \"" + groups + "\"?", new MessageBox.ConfirmCallback() {
                     public void execute(String btnID) {
@@ -1527,7 +1469,12 @@ public class SVNWebAdmin implements EntryPoint {
         atCB.setValidator(new ATCBValidator());
 
         final Window addGroupAccessWindow = new Window();
-
+        addGroupAccessWindow.setTitle("Add Group Access");
+        addGroupAccessWindow.setWidth(300);
+        addGroupAccessWindow.setHeight(150);
+        addGroupAccessWindow.setLayout(new FitLayout());
+        addGroupAccessWindow.setPaddings(4);
+        
         final Button addGroupAccessButton = new Button("Save", new ButtonListenerAdapter() {
             public void onClick(final Button button, EventObject e) {
                 if (atCB.getValueAsString().trim().equals("") ||
@@ -1549,7 +1496,7 @@ public class SVNWebAdmin implements EntryPoint {
                     final String group = groupCB.getValueAsString();
                     final String accessType = atCB.getValueAsString();
 
-                    //System.out.println("adding " + accessType + " access for group: " + group);
+                    //GWT.log("adding " + accessType + " access for group: " + group);
 
                     MessageBox.confirm("Confirm", "Add \"" + accessType + "\" access for group \"" + group + "\"?", new MessageBox.ConfirmCallback() {
                         public void execute(String btnID) {
@@ -1595,11 +1542,7 @@ public class SVNWebAdmin implements EntryPoint {
         });
 
 
-        addGroupAccessWindow.setTitle("Add Group Access");
-        addGroupAccessWindow.setWidth(300);
-        addGroupAccessWindow.setHeight(300);
-        addGroupAccessWindow.setLayout(new FitLayout());
-        addGroupAccessWindow.setPaddings(4);
+
         addGroupAccessWindow.setButtonAlign(Position.CENTER);
         addGroupAccessWindow.addButton(addGroupAccessButton);
         addGroupAccessWindow.addButton(addAccessCancelButton);
@@ -1680,7 +1623,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onRowClick(GridPanel grid, int rowIndex, EventObject e) {
                 Record r = grid.getStore().getAt(rowIndex);
                 String path = r.getAsString("projectPath");
-               // System.out.println("path clicked: " + path);
+               // GWT.log("path clicked: " + path);
                 populateAccessGridPanel(svnAdminService, accessGrid, accessStore, path, accessRecordDef);
 
             }
@@ -1762,7 +1705,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in removing project: " + projectPath);
-            //    System.out.println("Fail! " + System.currentTimeMillis());
+            //    GWT.log("Fail! " + System.currentTimeMillis());
                 e.printStackTrace();
             }
         };
@@ -1790,7 +1733,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in adding project: " + projectPath);
-               // System.out.println("Fail! " + System.currentTimeMillis());
+               // GWT.log("Fail! " + System.currentTimeMillis());
                 e.printStackTrace();
             }
         };
@@ -1824,7 +1767,7 @@ public class SVNWebAdmin implements EntryPoint {
             }
 
             public void onFailure(Throwable caught) {
-              //  System.out.println("Fail! " + System.currentTimeMillis());
+              //  GWT.log("Fail! " + System.currentTimeMillis());
                 caught.printStackTrace();
             }
         };
@@ -1866,7 +1809,7 @@ public class SVNWebAdmin implements EntryPoint {
             }
 
             public void onFailure(Throwable caught) {
-           //     System.out.println("Fail! " + System.currentTimeMillis());
+           //     GWT.log("Fail! " + System.currentTimeMillis());
                 caught.printStackTrace();
             }
         };
@@ -1903,7 +1846,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in adding the user: " + username);
-           //     System.out.println("Fail! " + System.currentTimeMillis());
+           //     GWT.log("Fail! " + System.currentTimeMillis());
                 e.printStackTrace();
             }
         };
@@ -1942,7 +1885,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in updating the user: " + username);
-           //     System.out.println("Fail! " + System.currentTimeMillis());
+           //     GWT.log("Fail! " + System.currentTimeMillis());
                 e.printStackTrace();
             }
         };
@@ -1982,7 +1925,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in deleting the user: " + username);
-             //   System.out.println("Fail! " + System.currentTimeMillis());
+             //   GWT.log("Fail! " + System.currentTimeMillis());
                 e.printStackTrace();
             }
         };
@@ -2035,7 +1978,7 @@ public class SVNWebAdmin implements EntryPoint {
         for (Iterator i = tempMap.keySet().iterator(); i.hasNext();) {
             String owner = (String) i.next();
             String access = (String) tempMap.get(owner);
-            //System.out.println("owner: " + owner + ", access: " + access);
+            // GWT.log("owner: " + owner + ", access: " + access);
             projectAccess[j] =  new Object[]{owner, access};
 
             j++;
