@@ -100,10 +100,6 @@ public class SVNWebAdmin implements EntryPoint {
         endpoint.setServiceEntryPoint(moduleRelativeURL);
 
         // 1st Panel - User
-     //   final RecordDef userRecordDef = new RecordDef(new FieldDef[] { new StringFieldDef("user") });
-       // final Store userStore = new Store(userRecordDef);
-       // userStore.load();
-
 
         // 2nd Panel - Group
         final RecordDef groupingRecordDef = new RecordDef(new FieldDef[] { new StringFieldDef("group"), new StringFieldDef("user") });
@@ -167,7 +163,7 @@ public class SVNWebAdmin implements EntryPoint {
 
         TabPanel tabs = new TabPanel();
         tabs.setWidth(500);
-        tabs.setHeight(400);
+        tabs.setHeight(500);
         tabs.setPaddings(8);
         tabs.add(usersPanel);
         tabs.add(groupsPanel);
@@ -282,7 +278,7 @@ public class SVNWebAdmin implements EntryPoint {
             }
 
             public void onFailure(Throwable caught) {
-               // GWT.log("Fail! " + System.currentTimeMillis());
+                GWT.log("Fail! " + System.currentTimeMillis(), caught);
                 caught.printStackTrace();
             }
         };
@@ -636,7 +632,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in removing memberships for users: " + uniqueUsers);
-              // GWT.log("Fail! " + System.currentTimeMillis());
+               GWT.log("Fail! " + System.currentTimeMillis(), e);
                e.printStackTrace();
            }
        };
@@ -739,7 +735,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in updating project access for groups: " + updateDetails);
-               //GWT.log("Fail! " + System.currentTimeMillis());
+               GWT.log("Fail! " + System.currentTimeMillis(), e);
                e.printStackTrace();
            }
        };
@@ -774,7 +770,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in adding project access: " + accessType + " for group: " + groupName);
-              // GWT.log("Fail! " + System.currentTimeMillis());
+               GWT.log("Fail! " + System.currentTimeMillis(), e);
                e.printStackTrace();
            }
        };
@@ -801,7 +797,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in removing project access: " + accessType + " for group: " + groupName);
-              // GWT.log("Fail! " + System.currentTimeMillis());
+               GWT.log("Fail! " + System.currentTimeMillis(), e);
                e.printStackTrace();
            }
        };
@@ -840,7 +836,7 @@ public class SVNWebAdmin implements EntryPoint {
            public void onFailure(Throwable e) {
                MessageBox.hide();
                MessageBox.alert("Error", "There was an error in creating the membership for user: " + userName);
-              // GWT.log("Fail! " + System.currentTimeMillis());
+               GWT.log("Fail! " + System.currentTimeMillis(), e);
                e.printStackTrace();
            }
        };
@@ -881,7 +877,7 @@ public class SVNWebAdmin implements EntryPoint {
            }
 
            public void onFailure(Throwable caught) {
-             //  GWT.log("Fail! " + System.currentTimeMillis());
+               GWT.log("Fail! " + System.currentTimeMillis(), caught);
                caught.printStackTrace();
            }
        };
@@ -1711,7 +1707,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in removing project: " + projectPath);
-            //    GWT.log("Fail! " + System.currentTimeMillis());
+                GWT.log("Fail! " + System.currentTimeMillis(), e);
                 e.printStackTrace();
             }
         };
@@ -1739,7 +1735,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in adding project: " + projectPath);
-               // GWT.log("Fail! " + System.currentTimeMillis());
+                GWT.log("Fail! " + System.currentTimeMillis(), e);
                 e.printStackTrace();
             }
         };
@@ -1773,7 +1769,7 @@ public class SVNWebAdmin implements EntryPoint {
             }
 
             public void onFailure(Throwable caught) {
-              //  GWT.log("Fail! " + System.currentTimeMillis());
+                GWT.log("Fail! " + System.currentTimeMillis(), caught);
                 caught.printStackTrace();
             }
         };
@@ -1815,7 +1811,7 @@ public class SVNWebAdmin implements EntryPoint {
             }
 
             public void onFailure(Throwable caught) {
-           //     GWT.log("Fail! " + System.currentTimeMillis());
+                GWT.log("Fail! " + System.currentTimeMillis(), caught);
                 caught.printStackTrace();
             }
         };
@@ -1852,7 +1848,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in adding the user: " + username);
-           //     GWT.log("Fail! " + System.currentTimeMillis());
+                GWT.log("Fail! " + System.currentTimeMillis(), e);
                 e.printStackTrace();
             }
         };
@@ -1891,7 +1887,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in updating the user: " + username);
-           //     GWT.log("Fail! " + System.currentTimeMillis());
+                GWT.log("Fail! " + System.currentTimeMillis(), e);
                 e.printStackTrace();
             }
         };
@@ -1931,7 +1927,7 @@ public class SVNWebAdmin implements EntryPoint {
             public void onFailure(Throwable e) {
                 MessageBox.hide();
                 MessageBox.alert("Error", "There was an error in deleting the user: " + username);
-             //   GWT.log("Fail! " + System.currentTimeMillis());
+                GWT.log("Fail! " + System.currentTimeMillis(), e);
                 e.printStackTrace();
             }
         };

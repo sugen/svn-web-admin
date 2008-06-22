@@ -7,7 +7,7 @@
 	</servlet>	
 	<servlet-mapping>
 		<servlet-name>svn-web-admin</servlet-name>
-		<url-pattern>/svn-web-admin*</url-pattern>
+		<url-pattern>/svn-web-admin</url-pattern>
 	</servlet-mapping>
 	
 	

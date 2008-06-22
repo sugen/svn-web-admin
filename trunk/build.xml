@@ -82,6 +82,7 @@
 		<copy todir="${build.dir}/WEB-INF/lib" preservelastmodified="true">
 			<fileset dir="${lib.dir}">
 				<include name="*.jar"/>
+				<exclude name="gwt-dev*.jar"/>
 			</fileset>
 		</copy>	
 		
