@@ -1,0 +1,176 @@
+<project name="svn-web-admin" default="usage">
+
+
+
+    <!-- sets tstamp properties for later use -->
+      <tstamp>
+          <format property="touch.time" pattern="MM/dd/yyyy hh:mm aa"/>
+      </tstamp>
+        
+	<property file="build.properties"/>
+        <property name="test.data.dir" value="${target.dir}/test" />
+        <property name="classes.dir" value="${build.dir}/WEB-INF/classes"/>
+
+	<path id="master-classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar"/>
+		</fileset>
+		<fileset dir="${external.lib.dir}">
+			<include name="servlet*.jar"/>
+			<include name="jsp-api.jar"/>
+		</fileset>					
+		<pathelement path="${classes.dir}"/>
+	</path>
+	
+	<path id="test-classpath">
+		<path refid="master-classpath" />
+	</path>
+
+	<path id="gwt-classpath">
+		<pathelement path="${src.dir}"/>
+		<path refid="master-classpath" />
+	</path>
+
+	<target name="usage">
+		<echo message=""/>
+		<echo message="${project.name} build file"/>
+		<echo message="-----------------------------------"/>
+		<echo message=""/>
+		<echo message="Available targets are:"/>
+		<echo message=""/>
+		<echo message="build     --> Build the application"/>
+		<echo message="war       --> creates deployable war file"/>
+		<echo message="clean     --> Cleans all generated files"/>
+		<echo message="test      --> runs unit tests"/>
+		<echo message=""/>
+	</target>
+
+	<target name="prepare" description="makes output directories">
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${classes.dir}"/>
+		<mkdir dir="${test.data.dir}"/>
+		<mkdir dir="${target.dir}"/>
+	</target>
+
+	<target name="clean" description="Clean output directories">
+		<delete dir="${build.dir}"/>
+		<delete dir="${classes.dir}"/>
+		<delete dir="${test.data.dir}"/>	
+		<delete dir="${target.dir}"/>
+	</target>
+
+	<target name="build" depends="clean, prepare" description="Compile main source tree java files">
+		<!-- GWT Compile Client side -->
+		<java classname="com.google.gwt.dev.GWTCompiler" fork="true" >
+			<jvmarg value="-Xmx1024m" />
+		        <arg value="-out"/>
+		        <arg value="${build.dir}"/>
+		        <arg value="com.wkinney.SVNWebAdmin"/>
+		        
+		        <classpath refid="gwt-classpath"/>
+      		</java>
+
+      		
+		<!-- Compile Server side -->
+		<javac destdir="${classes.dir}" debug="true" failonerror="true" nowarn="true" excludes="**/client/*.*">
+			<src path="${src.dir}"/>
+			<src path="${test.src.dir}"/>
+			<classpath refid="master-classpath"/>
+		</javac>
+		<!-- Copy lib directory into build for war deploy -->
+		<mkdir dir="${build.dir}/WEB-INF/lib"/>
+		<copy todir="${build.dir}/WEB-INF/lib" preservelastmodified="true">
+			<fileset dir="${lib.dir}">
+				<include name="*.jar"/>
+			</fileset>
+		</copy>	
+		
+		
+		<!-- Copy Server side properties -->
+		<copy todir="${classes.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">	
+				<include name="*.properties"/>
+				<include name="**/server/*.properties"/>
+				<include name="**/server/*.xml"/>			
+			</fileset>
+		</copy>
+		<!-- move custom properties file to root of classes dir -->
+		<move todir="${classes.dir}" flatten="true">
+		    <fileset dir="${classes.dir}">
+		      <include name="**/server/*.properties"/>
+		    </fileset>
+  		</move>
+  		<!-- move web.xml file to WEB-INF directory -->
+		<move todir="${build.dir}/WEB-INF" flatten="true">
+		    <fileset dir="${classes.dir}">
+		      <include name="**/server/web.xml"/>
+		    </fileset>
+  		</move>
+		
+		<!-- no copy of web files
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${web.dir}">
+				<include name="**/*.*"/>
+				<include name="**/*" />
+			</fileset>
+		</copy>	
+		-->
+
+	       <mkdir dir="${build.dir}/META-INF"/>
+	       <manifest file="${build.dir}/META-INF/MANIFEST.MF">
+		   <attribute name="Built-By" value="${user.name}"/>
+		   <section name="${project.name}">
+		     <attribute name="Specification-Title" value="${project.name}"/>
+		     <attribute name="Specification-Vendor" value="${project.vendor}"/>
+		     <attribute name="Specification-Date" value="${touch.time}"/>
+		     <!--  <attribute name="Implementation-Title" value="common"/> -->
+		     <!-- <attribute name="Implementation-Version" value="${version} ${TODAY}"/> -->
+		     <!--  <attribute name="Implementation-Vendor" value="Example Corp."/> -->
+		   </section>
+	       </manifest>
+	    
+	</target>
+	
+	<target name="war" depends="build" description="creates war file from build">
+		<war destfile="${target.dir}/${project.name}.war" 
+		     manifest="${build.dir}/META-INF/MANIFEST.MF" 
+		     webxml="${build.dir}/WEB-INF/web.xml">
+			<fileset dir="${build.dir}">
+				<include name="**/*.*"/>
+				<include name="**/*"/>
+			    <!-- don't want the unit test classes in the war -->
+			    <exclude name="**/*Test.class" />
+			</fileset>
+		</war>
+	</target>	
+	
+	<target name="test" depends="build" description="Runs the unit tests for the project">
+		<junit printsummary="true" 
+			   errorproperty="test.failed"
+			   haltonfailure="false">
+			
+			<classpath refid="test-classpath" />			
+			
+			<formatter type="brief" usefile="false"/>
+			<formatter type="xml" usefile="true" />
+			
+			<test name="${testcase}" todir="${test.data.dir}" if="testcase" />
+			
+			<batchtest todir="${test.data.dir}" unless="testcase">
+				<fileset dir="${classes.dir}" includes="**/*Test.class" />
+			</batchtest>
+
+		</junit>
+		<junitreport todir="${test.data.dir}">
+			<fileset dir="${test.data.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${test.data.dir}" />
+		</junitreport>
+		
+		<fail message="Tests failed. Check log and/or reports." if="test.failed" />
+		
+	</target>
+	
+
+</project>
