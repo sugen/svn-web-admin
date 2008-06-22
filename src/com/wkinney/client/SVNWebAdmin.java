@@ -90,7 +90,13 @@ public class SVNWebAdmin implements EntryPoint {
 
         final SVNAdminServiceAsync svnAdminService = (SVNAdminServiceAsync) GWT.create(SVNAdminService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) svnAdminService;
-        String moduleRelativeURL = GWT.getModuleBaseURL() + "svn-web-admin";
+        
+        /**
+         * Uncomment this for dev mode (GWT Shell tomcat)
+         * 
+         */
+        //String moduleRelativeURL = GWT.getModuleBaseURL() + "svn-web-admin";
+        final String moduleRelativeURL = GWT.getModuleBaseURL() + "svn-web-admin";
         endpoint.setServiceEntryPoint(moduleRelativeURL);
 
         // 1st Panel - User

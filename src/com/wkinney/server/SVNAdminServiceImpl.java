@@ -18,9 +18,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.wkinney.client.Membership;
 import com.wkinney.client.SVNAdminService;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
  * @author wkinney
@@ -32,7 +35,9 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
      *
      */
     private static final long serialVersionUID = 6730497416085709800L;
-
+    
+    protected final Log LOG = LogFactory.getLog(getClass());
+    
     private Collection<String> memberList = null;
 
     private Map<String, Collection<String>> groupMembersMap = null;
@@ -49,19 +54,19 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
     @Override
     public String[] getUserList() {
-        System.out.println("getUserList() - " + System.currentTimeMillis());
+        LOG.debug("getUserList() - " + System.currentTimeMillis());
         return (String[]) this.memberList.toArray(new String[this.memberList.size()]);
     }
 
     @Override
     public Map getGroupMembersMap() {
-        System.out.println("getGroupMembersMap() - " + System.currentTimeMillis());
+        LOG.debug("getGroupMembersMap() - " + System.currentTimeMillis());
         return this.groupMembersMap;
     }
 
     @Override
     public Map getProjectAccessMap() {
-        System.out.println("getProjectAccessMap() - " + System.currentTimeMillis());
+        LOG.debug("getProjectAccessMap() - " + System.currentTimeMillis());
         return this.projectAccessMap;
     }
 
@@ -73,7 +78,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
         // potential thread lock on this.loaded ??
         if (forceReload || !this.loaded) {
-            System.out.println("Loading configuration...");
+            LOG.debug("Loading configuration...");
 
             synchronized (SVNAdminServiceImpl.class) {
                 try {
@@ -216,7 +221,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
                     if (indexOfEqual != -1) {
                         groupName = line.substring(0, indexOfEqual);
                         groupName = groupName.trim();
-                        //System.out.println("adding groupName to list: " + groupName);
+                        //LOG.debug("adding groupName to list: " + groupName);
                         groupList.add(groupName);
 
 
@@ -230,7 +235,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
                         }
 
-                        System.out.println("adding members : " + membersForGroupList + ", for groupName: " + groupName);
+                        LOG.debug("adding members : " + membersForGroupList + ", for groupName: " + groupName);
                         groupMemberMap.put(groupName, membersForGroupList);
 
                     } else if (line.trim().equals("")) {
@@ -264,7 +269,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
                     }
                     groupPathsList = new HashSet<String>();
                     path = line.substring(1, line.indexOf(']'));
-                    System.out.println("path found: " + path);
+                    LOG.debug("path found: " + path);
                     pathFound = true;
                     continue;
                 } else if (!line.equals("")) {
@@ -352,7 +357,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             String envp[] = new String[1];
             envp[0] = "PATH=" + System.getProperty("java.library.path");
 
-            System.out.println("executing cmd: " + cmd + ", with PATH: " + envp[0]);
+            LOG.debug("executing cmd: " + cmd + ", with PATH: " + envp[0]);
 
 
 
@@ -366,11 +371,11 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             String line = null;
 
             while((line=input.readLine()) != null) {
-                System.out.println(line);
+                LOG.debug(line);
             }
 
             int exitVal = pr.waitFor();
-            System.out.println("Exited with code " + exitVal);
+            LOG.debug("Exited with code " + exitVal);
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -503,7 +508,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             memberList = new HashSet();
         }
 
-        System.out.println("adding members : " + userList + ", to group: " + groupName);
+        LOG.debug("adding members : " + userList + ", to group: " + groupName);
 
         memberList.addAll(userList);
 
@@ -579,7 +584,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             }
 
 
-            System.out.println("removing members : " + userList + ", from group: " + groupName);
+            LOG.debug("removing members : " + userList + ", from group: " + groupName);
 
             for (Iterator i = userList.iterator(); i.hasNext();) {
                 String memberToRemove = (String) i.next();
@@ -618,7 +623,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
             File authFile = new File(saveFile);
             if (!authFile.exists()) {
-                System.out.println("htpasswd access file: " + saveFile + " does not exist, creating new");
+                LOG.debug("htpasswd access file: " + saveFile + " does not exist, creating new");
             }
 
             if (!authFile.canWrite()) {
@@ -732,7 +737,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
         }
 
-        System.out.println("saving accessList: " + accessList + " for projectPath: " + projectPath);
+        LOG.debug("saving accessList: " + accessList + " for projectPath: " + projectPath);
         this.projectAccessMap.put(projectPath, accessList);
 
         saveData();
@@ -795,7 +800,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
     }
 
     private void saveData() {
-        System.out.println("Saving configuration...");
+        LOG.debug("Saving configuration...");
         try {
             saveDataToFile();
         } catch (Exception e) {
@@ -815,7 +820,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             throw new IllegalStateException("project access map has not been initialized");
         }
 
-        System.out.println("emptying project access list for project path: " + projectPath);
+        LOG.debug("emptying project access list for project path: " + projectPath);
         this.projectAccessMap.put(projectPath, new HashSet<String>());
 
 
@@ -862,7 +867,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
         accessList.add(accessLine);
 
-        System.out.println("adding project access for project path: " + projectPath + ". access line: " + accessLine);
+        LOG.debug("adding project access for project path: " + projectPath + ". access line: " + accessLine);
         this.projectAccessMap.put(projectPath, accessList);
 
         saveData();
@@ -908,7 +913,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             throw new RuntimeException("project path already exists: " + projectPath);
         }
 
-        System.out.println("adding project to access map: " + projectPath);
+        LOG.debug("adding project to access map: " + projectPath);
 
 
         this.projectAccessMap.put(projectPath, new HashSet<String>());
@@ -954,7 +959,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
                 throw new RuntimeException("project path does not exist: " + projectPath + ", cannot remove");
             }
 
-            System.out.println("removing project from access map: " + projectPath);
+            LOG.debug("removing project from access map: " + projectPath);
 
             this.projectAccessMap.remove(projectPath);
 
@@ -979,7 +984,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             throw new RuntimeException("group already exists: " + groupName);
         }
 
-        System.out.println("adding group to member map: " + groupName);
+        LOG.debug("adding group to member map: " + groupName);
 
 
         this.groupMembersMap.put(groupName, new HashSet<String>());
@@ -1009,7 +1014,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         if (memberList != null && memberList.size() > 0) {
             throw new RuntimeException("cannot delete group becuase it has members. group: " + groupName);
         }
-        System.out.println("removing group to member from map: " + groupName);
+        LOG.debug("removing group to member from map: " + groupName);
 
         this.groupMembersMap.remove(groupName);
 
@@ -1058,7 +1063,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
                 String groupName = i.next();
                 Collection<String> memberList = this.groupMembersMap.get(groupName);
                 if (memberList.contains(username)) {
-                    System.out.println("removing member: " + username + " from group: " + groupName);
+                    LOG.debug("removing member: " + username + " from group: " + groupName);
                     memberList.remove(username);
                 }
 
@@ -1110,7 +1115,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         String envp[] = new String[1];
         envp[0] = "PATH=" + System.getProperty("java.library.path");
 
-        System.out.println("executing cmd: " + cmd + ", with PATH: " + envp[0]);
+        LOG.debug("executing cmd: " + cmd + ", with PATH: " + envp[0]);
 
 
 
@@ -1124,11 +1129,11 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         String line = null;
 
         while((line=input.readLine()) != null) {
-            System.out.println(line);
+            LOG.debug(line);
         }
 
         int exitVal = pr.waitFor();
-        System.out.println("Exited with code " + exitVal);
+        LOG.debug("Exited with code " + exitVal);
     }
 
     /**
