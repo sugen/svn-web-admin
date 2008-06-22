@@ -15,10 +15,6 @@
 		<fileset dir="${lib.dir}">
 			<include name="*.jar"/>
 		</fileset>
-		<fileset dir="${external.lib.dir}">
-			<include name="servlet*.jar"/>
-			<include name="jsp-api.jar"/>
-		</fileset>					
 		<pathelement path="${classes.dir}"/>
 	</path>
 	
@@ -69,7 +65,11 @@
 		        
 		        <classpath refid="gwt-classpath"/>
       		</java>
-
+		<!-- move client code down one directory -->
+		<move todir="${build.dir}">
+			<fileset dir="${build.dir}/com.wkinney.SVNWebAdmin" />
+  		</move>
+      		<delete dir="${build.dir}/com.wkinney.SVNWebAdmin"/>
       		
 		<!-- Compile Server side -->
 		<javac destdir="${classes.dir}" debug="true" failonerror="true" nowarn="true" excludes="**/client/*.*">
