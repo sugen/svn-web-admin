@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+	<servlet>
+		<servlet-name>svn-web-admin</servlet-name>
+		<servlet-class>com.wkinney.server.SVNAdminServiceImpl</servlet-class>
+	</servlet>	
+	<servlet-mapping>
+		<servlet-name>svn-web-admin</servlet-name>
+		<url-pattern>/svn-web-admin</url-pattern>
+	</servlet-mapping>
+	
+	
+	
+	
+</web-app>
