@@ -3,7 +3,6 @@
  */
 package com.wkinney.client;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface SVNAdminServiceAsync {
 
-    public void getUserList(AsyncCallback callback);
+    public void getUserList(AsyncCallback<List<String>> callback);
 
     public void getGroupMembersMap(AsyncCallback callback);
 
@@ -37,11 +36,11 @@ public interface SVNAdminServiceAsync {
 
     public void deleteGroup(String groupName, AsyncCallback callback);
 
-    public void removeMembership(Collection memberships, AsyncCallback callback);
+    public void removeMembership(List memberships, AsyncCallback callback);
 
-    public void addMembership(String groupName, Collection userList, AsyncCallback callback);
+    public void addMembership(String groupName, List userList, AsyncCallback callback);
 
-    public void removeProject(Collection projectPath, AsyncCallback callback);
+    public void removeProject(List projectPath, AsyncCallback callback);
 
     public void removeProject(String projectPath, AsyncCallback callback);
 
