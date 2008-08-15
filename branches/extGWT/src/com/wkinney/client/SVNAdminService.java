@@ -3,7 +3,7 @@
  */
 package com.wkinney.client;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -14,17 +14,17 @@ import com.google.gwt.user.client.rpc.RemoteService;
  */
 public interface SVNAdminService extends RemoteService {
 
-    public String[] getUserList();
+    public List<String> getUserList();
 
     /**
-     * @gwt.typeArgs <java.lang.String, java.util.Collection<java.lang.String>>
+     * @gwt.typeArgs <java.lang.String, java.util.List<java.lang.String>>
      */
-    public Map getGroupMembersMap();
+    public Map<String, List<String>> getGroupMembersMap();
 
     /**
      * @gwt.typeArgs <java.lang.String, java.lang.String>
      */
-    public Map getProjectAccessMap();
+    public Map<String, List<String>> getProjectAccessMap();
 
     public void addUser(String username, String password);
 
@@ -35,7 +35,7 @@ public interface SVNAdminService extends RemoteService {
     /**
      * @gwt.typeArgs updatedProjectAccessMap <java.lang.String, java.lang.String>
      */
-    public void updateProjectAccess(String projectPath, Map updatedProjectAccessMap);
+    public void updateProjectAccess(String projectPath, Map<String, String> updatedProjectAccessMap);
 
     public void addProjectAccess(String projectPath, String groupName, String accessType);
 
@@ -48,14 +48,14 @@ public interface SVNAdminService extends RemoteService {
     /**
      * @gwt.typeArgs memberships <com.wkinney.client.Membership>
      */
-    public void removeMembership(Collection memberships);
+    public void removeMembership(List<Membership> memberships);
 
     /**
      * @gwt.typeArgs userList <java.lang.String>
      */
-    public void addMembership(String groupName, Collection userList);
+    public void addMembership(String groupName, List<String> userList);
 
-    public void removeProject(Collection projectPath);
+    public void removeProject(List<String> projectPath);
 
     public void removeProject(String projectPath);
 

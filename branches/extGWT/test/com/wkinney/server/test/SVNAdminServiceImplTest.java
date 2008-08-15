@@ -1,10 +1,12 @@
 package com.wkinney.server.test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -67,11 +69,12 @@ public class SVNAdminServiceImplTest extends TestCase {
         
         svnAdminServiceImpl.addUser(userToAdd, "junit" + System.currentTimeMillis());
         
-        String[] users = svnAdminServiceImpl.getUserList();
+        List<String> users = svnAdminServiceImpl.getUserList();
         
         boolean userFound = false;
-        for (int i = 0; i < users.length; i++) {
-            if (users[i].equals(userToAdd)) {
+        for (Iterator<String> i = users.iterator(); i.hasNext();) {
+            String user = i.next();
+            if (user.equals(userToAdd)) {
                 userFound = true;
                 break;
             }
@@ -85,14 +88,30 @@ public class SVNAdminServiceImplTest extends TestCase {
         users = svnAdminServiceImpl.getUserList();
         
         userFound = false;
-        for (int i = 0; i < users.length; i++) {
-            if (users[i].equals(userToAdd)) {
+        for (Iterator<String> i = users.iterator(); i.hasNext();) {
+            String user = i.next();
+            if (user.equals(userToAdd)) {
                 userFound = true;
                 break;
             }
         }
         assertTrue(!userFound);
         
+        
+    }
+    
+    public void testUpdateUserPassword() throws Exception {
+        SVNAdminServiceImpl svnAdminServiceImpl = new SVNAdminServiceImpl();
+        
+        List<String> users = svnAdminServiceImpl.getUserList();
+        
+        final String userToUpdate = users.get(new Random().nextInt(users.size()-1));
+        final String password = "pass" + System.currentTimeMillis();
+        
+        
+        svnAdminServiceImpl.editUser(userToUpdate, userToUpdate, password);
+        
+      
         
     }
     
@@ -105,15 +124,15 @@ public class SVNAdminServiceImplTest extends TestCase {
         // need to add them as a user first
         svnAdminServiceImpl.addUser(memberToAdd, "junit" + System.currentTimeMillis());
         
-        Map<String, Collection<String>> memberMap = svnAdminServiceImpl.getGroupMembersMap();
+        Map<String, List<String>> memberMap = svnAdminServiceImpl.getGroupMembersMap();
         
         final String group = memberMap.keySet().iterator().next();
         
-        Collection<String> memberList = memberMap.get(group);
+        List<String> memberList = memberMap.get(group);
         
         memberList.add(memberToAdd);
         
-        svnAdminServiceImpl.addMembership(group, memberList);
+        svnAdminServiceImpl.addMembership(group, new ArrayList(memberList));
         
         // make sure member was added
         
@@ -128,7 +147,7 @@ public class SVNAdminServiceImplTest extends TestCase {
         Set<Membership> removes = new HashSet<Membership>();
         removes.add(new Membership(group, memberToAdd));
         //removeMap
-        svnAdminServiceImpl.removeMembership(removes);
+        svnAdminServiceImpl.removeMembership(new ArrayList(removes));
         
         memberMap = svnAdminServiceImpl.getGroupMembersMap();
         
@@ -142,11 +161,12 @@ public class SVNAdminServiceImplTest extends TestCase {
         
         svnAdminServiceImpl.deleteUser(memberToAdd);
         
-        String[] users = svnAdminServiceImpl.getUserList();
+        List<String> users = svnAdminServiceImpl.getUserList();
         
         boolean userFound = false;
-        for (int i = 0; i < users.length; i++) {
-            if (users[i].equals(memberToAdd)) {
+        for (Iterator<String> i = users.iterator(); i.hasNext();) {
+            String user = i.next();
+            if (user.equals(memberToAdd)) {
                 userFound = true;
                 break;
             }
@@ -176,10 +196,10 @@ public class SVNAdminServiceImplTest extends TestCase {
         assertTrue(foundProject);
         
         // remove it
-        Collection projectPathList = new HashSet(1);
+        Set projectPathList = new HashSet(1);
         projectPathList.add(projectName);
         
-        svnAdminServiceImpl.removeProject(projectPathList);
+        svnAdminServiceImpl.removeProject(new ArrayList(projectPathList));
         
         projectAccessMap = svnAdminServiceImpl.getProjectAccessMap();
         
@@ -201,7 +221,7 @@ public class SVNAdminServiceImplTest extends TestCase {
     public void testAddAndRemoveProjectAccess() throws Exception {
         SVNAdminServiceImpl svnAdminServiceImpl = new SVNAdminServiceImpl();
         
-        Map<String, Collection<String>> projectAccessMap = svnAdminServiceImpl.getProjectAccessMap();
+        Map<String, List<String>> projectAccessMap = svnAdminServiceImpl.getProjectAccessMap();
         
         final String projectPath = projectAccessMap.keySet().iterator().next();
         
@@ -271,11 +291,11 @@ public class SVNAdminServiceImplTest extends TestCase {
     public void testUpdateProjectAccess() throws Exception {
         SVNAdminServiceImpl svnAdminServiceImpl = new SVNAdminServiceImpl();
         
-        Map projectAccessMap = svnAdminServiceImpl.getProjectAccessMap();
+        Map<String, List<String>> projectAccessMap = svnAdminServiceImpl.getProjectAccessMap();
         
         final String projectPath = (String) projectAccessMap.keySet().iterator().next();
         
-        Collection<String> accessList = (Collection<String>) projectAccessMap.get(projectPath);
+        List<String> accessList = projectAccessMap.get(projectPath);
 
         Map<String, String> tempMap = svnAdminServiceImpl.parseProjectRightsString(accessList);
         
@@ -295,7 +315,7 @@ public class SVNAdminServiceImplTest extends TestCase {
         
         projectAccessMap = svnAdminServiceImpl.getProjectAccessMap();
         
-        accessList = (Collection<String>) projectAccessMap.get(projectPath);
+        accessList = projectAccessMap.get(projectPath);
 
         String accessLineTemp = svnAdminServiceImpl.createAccessLine(g, accessRights);
         
@@ -310,7 +330,7 @@ public class SVNAdminServiceImplTest extends TestCase {
         
         projectAccessMap = svnAdminServiceImpl.getProjectAccessMap();
         
-        accessList = (Collection<String>) projectAccessMap.get(projectPath);
+        accessList = projectAccessMap.get(projectPath);
 
         accessLineTemp = svnAdminServiceImpl.createAccessLine(g, accessRights);
         
@@ -322,7 +342,7 @@ public class SVNAdminServiceImplTest extends TestCase {
         // remove group
         svnAdminServiceImpl.deleteGroup(g);
         
-        Map<String, Collection<String>> memberMap = svnAdminServiceImpl.getGroupMembersMap();
+        Map<String, List<String>> memberMap = svnAdminServiceImpl.getGroupMembersMap();
         
         assertTrue(!memberMap.containsKey(g));
     }
