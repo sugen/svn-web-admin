@@ -14,6 +14,10 @@ h2 {
   font-weight: normal;
 }
 
+h3 {
+	padding-left: 5px;	
+}
+
 table {
   font-size: 100%;
 }
@@ -94,6 +98,9 @@ a:visited {
 }
 
 .gwt-ListBox {
+  border: 1px solid #ededed;
+  background-color: #ededed;
+  margin-left: 5px;	
 }
 
 .gwt-MenuBar {
@@ -179,55 +186,72 @@ a:visited {
 }
 
 .gwt-StackPanel {
-
+	border-top: 1px solid #c4c4c4;
+	border-left: 1px solid #c4c4c4;
+	border-right: 1px solid #c4c4c4;
+	margin-left: 5px;
 }
 
 .gwt-StackPanel .gwt-StackPanelItem {
-  background-color: #C3D9FF;
   cursor: pointer;
   cursor: hand;
   font-weight: bold;
   width: 300px;
+  padding: 10px 0px 10px 5px;
+  border-bottom: 1px solid #c4c4c4;
 }
 
 .gwt-StackPanel .gwt-StackPanelItem-selected {
-
+  background-color: #ce344e;
 }
 
 .gwt-PushButton-up {
-  background-color: #C3D9FF;
+  background-color: #ce344e;
   padding: 2px;
   border: 2px solid transparent;
-  border-color: #E8F1FF rgb(157, 174, 205) rgb(157, 174, 205) rgb(232, 241, 255);
+  border-color: #ff7f8c #ac0135 #ac0135 #ff7f8c;
   cursor: pointer;
   cursor: hand;
+  color: white;
 }
 
 .gwt-PushButton-up-hovering {
-  background-color: #C3D9FF;
+  background-color: #ce344e;
   padding: 2px;
   border: 2px solid transparent;
-  border-color: #E8F1FF rgb(157, 174, 205) rgb(157, 174, 205) rgb(232, 241, 255);
+  border-color: #ff7f8c #ac0135 #ac0135 #ff7f8c;
   cursor: pointer;
   cursor: hand;
+  color: white;
 }
 
 .gwt-PushButton-down {
-  background-color: #C3D9FF;
+  background-color: #ff7f8c;
   padding: 2px;
   border: 2px solid transparent;
-  border-color: #9DAECD rgb(232, 241, 255) rgb(232, 241, 255) rgb(157, 174, 205);
+  border-color: #ac0135 #ff7f8c #ff7f8c #ac0135;
   cursor: pointer;
   cursor: hand;
+  color: white;
 }
 
 .gwt-PushButton-down-hovering {
-  background-color: #C3D9FF;
+  background-color: #ff7f8c;
   padding: 2px;
   border: 2px solid transparent;
-  border-color: #9DAECD rgb(232, 241, 255) rgb(232, 241, 255) rgb(157, 174, 205);
+  border-color: #ac0135 #ff7f8c #ff7f8c #ac0135;
   cursor: pointer;
   cursor: hand;
+  color: white;
+}
+
+.gwt-PushButton-up-disabled {
+  background-color: #ededed;	
+  padding: 2px;
+  border: 2px solid transparent;
+  border-color: #fcfcfc #c4c4c4 #c4c4c4 #fcfcfc;
+  cursor: default;
+
 }
 
 .gwt-ToggleButton-up {
@@ -327,11 +351,11 @@ a:visited {
 }
 
 .gwt-HorizontalSplitPanel {
-  border: 8px solid #C3D9FF;
+  border: 2px solid #ededed;
 }
 
 .gwt-HorizontalSplitPanel .hsplitter {
-  background-color: #C3D9FF;
+  background-color: #ededed;
   cursor: move;
 }
 
@@ -361,6 +385,177 @@ a:visited {
   padding: 2px;
 }
 
+
+/*********/
+
+.grid {
+	margin-left: 5px;	
+}
+
+.member-panel {
+	
+	background-color: #ededed;
+	border-bottom: 1px solid #c4c4c4;
+	cursor: pointer;
+    cursor: hand;
+    display: block;
+}
+
+
+
+.member-label-hover {
+	background-color: #c4c4c4;
+}
+
+.member-label-empty {
+	font-style: italic;	
+	cursor: default;
+}
+
+.access-row-header {
+	font-weight: bold; 
+}
+
+.access-col-header {
+	width: 70%	
+}
+
+.access-row {
+	cursor: pointer;
+    cursor: hand;
+    display: block;
+
+}
+
+.access-row-empty {
+	cursor: default;
+}
+
+.access-row-selected {
+	background-color: #ededed;
+}
+
+.access-grid {
+	border: 1px solid #ededed;	
+	border-collapse: collapse;
+}
+
+/* -------------------------------------------------------------------------- */
+.ks-Sink {
+  width: 100%;
+  height: 24em;
+}
+
+.ks-Info {
+  color: white;
+  padding: 10px 10px 10px 40px;
+  margin-bottom: 5px;
+}
+
+.ks-List {
+}
+
+.ks-List .gwt-Image {
+  position: relative;
+  top: 8px;
+}
+
+.ks-List .ks-SinkItem a {
+  text-decoration: none;
+  color: white;
+}
+
+.ks-List .ks-SinkItem-selected a {
+  text-decoration: none;
+  color: white;
+}
+
+.ks-List .ks-FirstSinkItem a {
+  text-decoration: none;
+  color: white;
+}
+
+.ks-List .ks-FirstSinkItem-selected a {
+  text-decoration: none;
+  color: white;
+}
+
+.ks-List .ks-SinkItem {
+  background: #c6cab7;
+  padding: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-right: 3px;
+  border-bottom: 3px solid white;
+  cursor: pointer;
+  cursor: hand;
+}
+
+.ks-List .ks-SinkItem-selected {
+  background: #c6cab7;
+  padding: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-right: 3px;
+  padding-bottom: 7px;
+}
+
+.ks-List .ks-FirstSinkItem {
+  background: #c6cab7 url(../images/corner.gif) no-repeat top left;
+  padding: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-right: 3px;
+  border-bottom: 3px solid white;
+  cursor: pointer;
+  cursor: hand;
+}
+
+.ks-List .ks-FirstSinkItem-selected {
+  background: #c3d9ff url(../images/corner.gif) no-repeat top left;
+  padding: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-right: 3px;
+  padding-bottom: 7px;
+}
+
+.ks-images-Image {
+  margin: 8px;
+}
+
+.ks-images-Button {
+  margin: 8px;
+  cursor: pointer;
+  cursor: hand;
+}
+
+.ks-layouts {
+  margin: 8px;
+}
+
+.ks-layouts-Label {
+  background-color: #C3D9FF;
+  font-weight: bold;
+  margin-top: 1em;
+  padding: 2px 0px 2px 0px;
+  width: 100%;
+}
+
+.ks-layouts-Scroller {
+  height: 128px;
+  border: 2px solid #C3D9FF;
+  padding: 8px;
+  margin: 8px;
+}
+
+.ks-popups-Popup {
+  background-color: white;
+  border: 1px solid #87B3FF;
+  padding: 4px;
+}
+
+
 /* -------------------------------------------------------------------------- */
 
 .swa-TableHeader {
@@ -373,22 +568,41 @@ a:visited {
 
 .user-add-icon {
 	background-image: url( '../images/icons/fam/user_add.gif' ) !important;
+	background-repeat: no-repeat;
+	background-position: center left;
+	padding-left: 20px;
+	 
 }
 
 .user-edit-icon {
 	background-image: url( '../images/icons/fam/user_edit.gif' ) !important;
+	background-repeat: no-repeat;
+	background-position: center left;
+	padding-left: 20px;
+	 
 }
 
 .user-icon {
 	background-image: url( '../images/icons/fam/user.gif' ) !important;
+	background-repeat: no-repeat;
+	background-position: center left;
+	padding-left: 20px;
+	 
 }
 
 .user-suit-icon {
 	background-image: url( '../images/icons/fam/user_suit.gif' ) !important;
+	background-repeat: no-repeat;
+	background-position: center left;
+	padding-left: 20px;
+	 
 }
 
 .user-delete-icon {
 	background-image: url( '../images/icons/fam/user_delete.gif' ) !important;
+	background-repeat: no-repeat;
+	background-position: center left;
+	padding-left: 20px;
 }
  
  

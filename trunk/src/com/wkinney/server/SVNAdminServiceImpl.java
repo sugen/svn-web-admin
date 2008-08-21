@@ -11,11 +11,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -38,11 +40,11 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
     
     protected final Log LOG = LogFactory.getLog(getClass());
     
-    private Collection<String> memberList = null;
+    private Set<String> memberList = null;
 
-    private Map<String, Collection<String>> groupMembersMap = null;
+    private Map<String, List<String>> groupMembersMap = null;
 
-    private Map<String, Collection<String>> projectAccessMap = null;
+    private Map<String, List<String>> projectAccessMap = null;
 
     private boolean loaded;
 
@@ -53,19 +55,19 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
 
     @Override
-    public String[] getUserList() {
+    public List<String> getUserList() {
         LOG.debug("getUserList() - " + System.currentTimeMillis());
-        return (String[]) this.memberList.toArray(new String[this.memberList.size()]);
+        return new ArrayList<String>(this.memberList);
     }
 
     @Override
-    public Map getGroupMembersMap() {
+    public Map<String, List<String>> getGroupMembersMap() {
         LOG.debug("getGroupMembersMap() - " + System.currentTimeMillis());
         return this.groupMembersMap;
     }
 
     @Override
-    public Map getProjectAccessMap() {
+    public Map<String, List<String>> getProjectAccessMap() {
         LOG.debug("getProjectAccessMap() - " + System.currentTimeMillis());
         return this.projectAccessMap;
     }
@@ -108,7 +110,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         InputStream is = null;
 
         try {
-            final Collection<String> memberList = new HashSet<String>();
+            final Set<String> tempMemberList = new HashSet<String>();
 
             is = Thread.currentThread().getContextClassLoader().getResourceAsStream(svnAuthFile);
             if (is == null) {
@@ -146,12 +148,12 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
                 // parse out username
                 indexOfSemiColon = line.indexOf(':');
                 username = line.substring(0, indexOfSemiColon);
-                memberList.add(username);
+                tempMemberList.add(username);
 
                 line = br.readLine();
             }
 
-            this.memberList = memberList;
+            this.memberList = tempMemberList;
 
         } finally {
             try {
@@ -170,9 +172,9 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         InputStream is = null;
 
         try {
-            final Collection<String> groupList = new HashSet<String>();
-            Collection<String> membersForGroupList = null;
-            final Map<String, Collection<String>> groupMemberMap = new HashMap<String, Collection<String>>();
+            final Set<String> groupList = new HashSet<String>();
+            List<String> membersForGroupList = null;
+            final Map<String, List<String>> groupMemberMap = new HashMap<String, List<String>>();
 
 
 
@@ -226,12 +228,15 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
 
                         // get group members
-                        membersForGroupList = new HashSet<String>();
+                        membersForGroupList = new ArrayList<String>();
                         String membersCSV = line.substring(indexOfEqual+1, line.length());
                         StringTokenizer st = new StringTokenizer(membersCSV.trim(), ",");
                         while (st.hasMoreTokens()) {
                             String member = st.nextToken();
-                            membersForGroupList.add(member.trim());
+                            if (!membersForGroupList.contains(member.trim())) {
+                              membersForGroupList.add(member.trim());
+                            }
+                            
 
                         }
 
@@ -254,9 +259,9 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             }
 
 
-            Map<String, Collection<String>> projectAccessMap = new HashMap<String, Collection<String>>();
+            Map<String, List<String>> projectAccessMap = new HashMap<String, List<String>>();
 
-            Collection<String> groupPathsList = new HashSet<String>();
+            List<String> groupPathsList = new ArrayList<String>();
             String path = null;
             boolean pathFound = false;
             for (String line = tempLine; line != null; line = br.readLine()) {
@@ -267,7 +272,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
                        // Object[][] pathRights = parseProjectRightsString(groupPathsList);
                         projectAccessMap.put(path, groupPathsList);
                     }
-                    groupPathsList = new HashSet<String>();
+                    groupPathsList = new ArrayList<String>();
                     path = line.substring(1, line.indexOf(']'));
                     LOG.debug("path found: " + path);
                     pathFound = true;
@@ -321,61 +326,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
         try {
 
-            String htpasswdScript = SVNAdminServiceProperties.getHtpasswdScript();
-            String htpasswdFlags = SVNAdminServiceProperties.getHtpasswdFlags();
-            String htpasswdAuthFile = SVNAdminServiceProperties.getHtpasswdUserAuthFile();
-            //String ds = SVNAdminServiceProperties.getUserAddScript();
-
-
-            // can't do this b/c htpasswd could be in PATH
-
-//            File scriptFile = new File(htpasswdScript);
-//            if (!scriptFile.exists()) {
-//                throw new RuntimeException("Can't find htpasswd script file: " + htpasswdScript);
-//            }
-//            if (!scriptFile.canExecute()) {
-//                throw new RuntimeException("Can't execute htpasswd script file: " + htpasswdScript);
-//            }
-//
-            File authFile = new File(htpasswdAuthFile);
-            if (!authFile.exists()) {
-                // -c == create file (initial)
-                htpasswdFlags = " -c " + htpasswdFlags;
-            } else {
-                // make sure can rw
-                if (!authFile.canRead() || !authFile.canWrite()) {
-                    throw new RuntimeException("Can't read/write htpasswd authorization file: " + htpasswdAuthFile);
-                }
-            }
-
-            // for inline passwd
-            final String batchModeFlag = " -b ";
-            htpasswdFlags = batchModeFlag + htpasswdFlags;
-
-
-            final String cmd = htpasswdScript + " " + htpasswdFlags + " " + htpasswdAuthFile + " " + username + " " + password;
-            String envp[] = new String[1];
-            envp[0] = "PATH=" + System.getProperty("java.library.path");
-
-            LOG.debug("executing cmd: " + cmd + ", with PATH: " + envp[0]);
-
-
-
-            Runtime rt = Runtime.getRuntime();
-            Process pr = rt.exec(cmd, envp);
-
-
-
-            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-
-            String line = null;
-
-            while((line=input.readLine()) != null) {
-                LOG.debug(line);
-            }
-
-            int exitVal = pr.waitFor();
-            LOG.debug("Exited with code " + exitVal);
+            addUserOnly(username, password);
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -443,6 +394,9 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
         try {
             deleteUserOnly(oldUsername);
+            
+            loadUserMemberList();
+            
             addUser(username, password);
 
             updateAccessUser(oldUsername, username);
@@ -460,12 +414,18 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
     }
 
     private void updateAccessUser(String oldUsername, String newUserName) {
+        
+        if (oldUsername.equals(newUserName)) {
+            LOG.debug("skipping update access user since username didn't change");
+            return;
+        }
 
+        
         for(Iterator<String> i = this.groupMembersMap.keySet().iterator(); i.hasNext();) {
 
             String group = i.next();
 
-            Collection<String> userList = this.groupMembersMap.get(group);
+            List<String> userList = this.groupMembersMap.get(group);
 
             if (userList.contains(oldUsername)) {
                 userList.remove(oldUsername);
@@ -478,7 +438,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
     }
 
     @Override
-    public void addMembership(String groupName, Collection userList) {
+    public void addMembership(String groupName, List<String> userList) {
         if (groupName == null || groupName.trim().equals("")) {
             throw new IllegalArgumentException("group name cannot be null or empty string");
         }
@@ -503,14 +463,18 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             throw new RuntimeException("member list to add: " + userList + " contains 1 or more users who do not exist");
         }
 
-        Collection<String> memberList = this.groupMembersMap.get(groupName);
+        List<String> memberList = this.groupMembersMap.get(groupName);
         if (memberList == null) {
-            memberList = new HashSet();
+            memberList = new ArrayList();
         }
 
         LOG.debug("adding members : " + userList + ", to group: " + groupName);
 
-        memberList.addAll(userList);
+        for (String user : userList) {
+          if (!memberList.contains(user)) {
+            memberList.add(user);
+          }
+        }
 
         this.groupMembersMap.put(groupName, memberList);
 
@@ -519,17 +483,17 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
     }
 
-    public void removeMembership(Collection memberships) {
+    public void removeMembership(List<Membership> memberships) {
 
         if (memberships == null || memberships.size() == 0) {
             throw new IllegalArgumentException("memberships is null or empty");
         }
 
-        Collection<Membership> tempMemberships = memberships;
+        Set<Membership> tempMemberships = new HashSet<Membership>(memberships);
 
         // convert to Map, List
 
-        Map<String, Collection<String>> memberListMap = new HashMap<String, Collection<String>>(tempMemberships.size());
+        Map<String, Set<String>> memberListMap = new HashMap<String, Set<String>>(tempMemberships.size());
 
         String group = null;
         String member = null;
@@ -546,7 +510,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             }
 
 
-            Collection<String> memberList = null;
+            Set<String> memberList = null;
             if (memberListMap.containsKey(group)) {
                 memberList = memberListMap.get(group);
             } else {
@@ -561,7 +525,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         for (Iterator<String> it = memberListMap.keySet().iterator(); it.hasNext();) {
             String groupName = it.next();
 
-            Collection<String> userList = memberListMap.get(groupName);
+            Set<String> userList = memberListMap.get(groupName);
 
             if (userList == null || userList.size() == 0) {
                 throw new IllegalArgumentException("user list cannot be null or empty");
@@ -578,7 +542,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             }
 
 
-            Collection<String> memberList = this.groupMembersMap.get(groupName);
+            List<String> memberList = this.groupMembersMap.get(groupName);
             if (memberList == null || memberList.size() == 0) {
                 throw new RuntimeException("cannot remove membership group current member list is empty. group: " + groupName);
             }
@@ -645,7 +609,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
                 String groupName = i.next();
 
-                Collection<String> memberList = this.groupMembersMap.get(groupName);
+                List<String> memberList = this.groupMembersMap.get(groupName);
                 String memberString = null;
                 for (String member : memberList) {
                     if (memberString == null) {
@@ -671,7 +635,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
                 String projectPath = i.next();
 
-                Collection<String> accessStringList = this.projectAccessMap.get(projectPath);
+                List<String> accessStringList = this.projectAccessMap.get(projectPath);
                 bw.write("[" + projectPath + "]");
                 bw.newLine();
                 for (String accessString : accessStringList) {
@@ -715,7 +679,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
         emptyAccessForProject(projectPath);
 
-        Collection<String> accessList = new HashSet<String>();
+        List<String> accessList = new ArrayList<String>();
 
         for (Iterator<String> groupIt = tempUpdatedProjectAccessMap.keySet().iterator(); groupIt.hasNext();) {
 
@@ -769,7 +733,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             throw new RuntimeException("could not remove group for project path, project path not found");
         }
 
-        Collection<String> accessList = this.projectAccessMap.get(projectPath);
+        List<String> accessList = this.projectAccessMap.get(projectPath);
 
         String accessLine = createAccessLine(groupName, accessType);
         if (!accessList.contains(accessLine)) {
@@ -821,7 +785,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         }
 
         LOG.debug("emptying project access list for project path: " + projectPath);
-        this.projectAccessMap.put(projectPath, new HashSet<String>());
+        this.projectAccessMap.put(projectPath, new ArrayList<String>());
 
 
 
@@ -849,10 +813,10 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         projectPath = projectPath.trim();
 
 
-        Collection<String> accessList = this.projectAccessMap.get(projectPath);
+        List<String> accessList = this.projectAccessMap.get(projectPath);
 
         if (accessList == null) {
-            accessList = new HashSet<String>();
+            accessList = new ArrayList<String>();
         }
 
         String accessLine = createAccessLine(groupName, access);
@@ -916,7 +880,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         LOG.debug("adding project to access map: " + projectPath);
 
 
-        this.projectAccessMap.put(projectPath, new HashSet<String>());
+        this.projectAccessMap.put(projectPath, new ArrayList<String>());
 
         saveData();
         loadData(true);
@@ -925,21 +889,21 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
 
     /**
-     * Wrapper for removeProject(Collection)
+     * Wrapper for removeProject(Set)
      *
      */
     public void removeProject(String projectPath) {
-        Collection projectPathList = new HashSet(1);
+        List projectPathList = new ArrayList(1);
         projectPathList.add(projectPath);
         removeProject(projectPathList);
 
     }
 
     @Override
-    public void removeProject(Collection projectPathList) {
+    public void removeProject(List projectPathList) {
 
         if (projectPathList == null || projectPathList.size() == 0) {
-            throw new IllegalArgumentException("project path collection cannot be null or empty");
+            throw new IllegalArgumentException("project path Set cannot be null or empty");
         }
 
         for (Iterator i = projectPathList.iterator(); i.hasNext(); ) {
@@ -987,7 +951,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
         LOG.debug("adding group to member map: " + groupName);
 
 
-        this.groupMembersMap.put(groupName, new HashSet<String>());
+        this.groupMembersMap.put(groupName, new ArrayList<String>());
 
         saveData();
 
@@ -1010,7 +974,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
             throw new RuntimeException("group does not exist: " + groupName);
         }
 
-        Collection<String> memberList = this.groupMembersMap.get(groupName);
+        List<String> memberList = this.groupMembersMap.get(groupName);
         if (memberList != null && memberList.size() > 0) {
             throw new RuntimeException("cannot delete group becuase it has members. group: " + groupName);
         }
@@ -1061,7 +1025,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
             for (Iterator<String> i = this.groupMembersMap.keySet().iterator(); i.hasNext();) {
                 String groupName = i.next();
-                Collection<String> memberList = this.groupMembersMap.get(groupName);
+                List<String> memberList = this.groupMembersMap.get(groupName);
                 if (memberList.contains(username)) {
                     LOG.debug("removing member: " + username + " from group: " + groupName);
                     memberList.remove(username);
@@ -1080,6 +1044,53 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
 
     }
 
+    private void addUserOnly(String username, String password) throws IOException, InterruptedException {
+        String htpasswdScript = SVNAdminServiceProperties.getHtpasswdScript();
+        String htpasswdFlags = SVNAdminServiceProperties.getHtpasswdFlags();
+        String htpasswdAuthFile = SVNAdminServiceProperties.getHtpasswdUserAuthFile();
+
+        File authFile = new File(htpasswdAuthFile);
+        if (!authFile.exists()) {
+            // -c == create file (initial)
+            htpasswdFlags = " -c " + htpasswdFlags;
+        } else {
+            // make sure can rw
+            if (!authFile.canRead() || !authFile.canWrite()) {
+                throw new RuntimeException("Can't read/write htpasswd authorization file: " + htpasswdAuthFile);
+            }
+        }
+
+        // for inline passwd
+        final String batchModeFlag = " -b ";
+        htpasswdFlags = batchModeFlag + htpasswdFlags;
+
+
+        final String cmd = htpasswdScript + " " + htpasswdFlags + " " + htpasswdAuthFile + " " + username + " " + password;
+        String envp[] = new String[1];
+        envp[0] = "PATH=" + System.getProperty("java.library.path");
+
+        LOG.debug("executing cmd: " + cmd + ", with PATH: " + envp[0]);
+
+
+
+        Runtime rt = Runtime.getRuntime();
+        Process pr = rt.exec(cmd, envp);
+
+
+
+        BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+        String line = null;
+
+        while((line=input.readLine()) != null) {
+            LOG.debug(line);
+        }
+
+        int exitVal = pr.waitFor();
+        LOG.debug("Exited with code " + exitVal);
+    }
+
+    
 
     private void deleteUserOnly(String username) throws IOException, InterruptedException {
         String htpasswdScript = SVNAdminServiceProperties.getHtpasswdScript();
@@ -1142,7 +1153,7 @@ public class SVNAdminServiceImpl extends RemoteServiceServlet implements SVNAdmi
      * @param lineList
      * @return
      */
-    public Map<String, String> parseProjectRightsString(Collection lineList) {
+    public Map<String, String> parseProjectRightsString(List lineList) {
 
         if (lineList == null || lineList.size() == 0) {
             return new HashMap<String, String>(0);
